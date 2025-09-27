@@ -1,4 +1,6 @@
 package com.example.app.utils
+import com.example.app.exceptions.ParsingException
+
 
 object AppUtils {
     private val regex = Regex(
@@ -7,10 +9,17 @@ object AppUtils {
 
 
     fun extractNumbersFromText(text: String): List<Double> {
-        return regex.findAll(text)
-            .map { normalizeNumber(it.value) }   // fix decimal separators
-            .mapNotNull { it.toDoubleOrNull() }  // safely parse to Double
-            .toList()
+        val matches = regex.findAll(text).map { it.value }.toList()
+
+        if (matches.isEmpty()) {
+            throw ParsingException("No numbers found in input text")
+        }
+
+        return matches.map { raw ->
+            val normalized = normalizeNumber(raw)
+            normalized.toDoubleOrNull()
+                ?: throw ParsingException("Cannot parse number: '$raw' after normalization: '$normalized'")
+        }
     }
 
     fun normalizeNumber(raw: String): String {

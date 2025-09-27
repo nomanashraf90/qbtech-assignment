@@ -14,7 +14,7 @@ object BenfordLawUtils {
 
 
     fun performBenfordsLawTest(observedCounts: LongArray, expectedCounts: DoubleArray, significance: Double): AppResponse {
-        val chiTest = ChiSquareTest()
+            val chiTest = ChiSquareTest()
         val chiSquare = chiTest.chiSquare(expectedCounts, observedCounts)
         val pValue = chiTest.chiSquareTest(expectedCounts, observedCounts)
 

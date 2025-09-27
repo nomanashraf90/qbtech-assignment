@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm") version "1.9.10"
     kotlin("plugin.serialization") version "1.9.10"
     id("io.ktor.plugin") version "2.3.6"
+    id("jacoco")
     application
 }
 
@@ -44,8 +45,17 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
 }
 
+tasks.jacocoTestReport {
+    dependsOn(tasks.test) // tests must run before report
+    reports {
+        xml.required.set(true)
+        csv.required.set(false)
+        html.required.set(true) // you can open build/reports/jacoco/test/html/index.html
+    }
+}
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions.jvmTarget = "17"
