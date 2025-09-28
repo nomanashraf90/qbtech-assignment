@@ -44,7 +44,7 @@ class AppRoutesTest {
         assertEquals(HttpStatusCode.OK, response.status)
 
         val body: AppResponse = mapper.readValue(response.bodyAsText(), AppResponse::class.java)
-        assertTrue(body.followsBenford, "Distribution should follow Benford’s law")
+        assertTrue(body.followsBenford, "Following Benford’s law")
     }
 
     @Test
@@ -69,7 +69,7 @@ class AppRoutesTest {
         assertEquals(HttpStatusCode.OK, response.status)
 
         val body: AppResponse = mapper.readValue(response.bodyAsText(), AppResponse::class.java)
-        assertFalse(body.followsBenford, "Distribution should not follow Benford’s law")
+        assertFalse(body.followsBenford, "Not following Benford’s law")
     }
 
     @Test
@@ -96,4 +96,30 @@ class AppRoutesTest {
         assertTrue(errorResponse.has("error"))
         assertEquals("significanceLevel must be between 0 and 1 exclusive", errorResponse["error"].asText())
     }
+
+    @Test
+    fun testBenfordApiParsingException() = testApplication {
+        application {
+            install(ContentNegotiation) { jackson() }
+            routing { appRoutes() }
+        }
+
+        val request = AppRequest(
+            text = "abc, xyz, ???",  // invalid numbers
+            significanceLevel = 0.05
+        )
+
+        val jsonBody = mapper.writeValueAsString(request)
+
+        val response: HttpResponse = client.post("/api/benford") {
+            contentType(ContentType.Application.Json)
+            setBody(jsonBody)
+        }
+
+        assertEquals(HttpStatusCode.BadRequest, response.status)
+        val errorResponse = mapper.readTree(response.bodyAsText())
+        assertTrue(errorResponse.has("error"))
+        assertTrue(errorResponse["error"].asText().contains("No numbers"), "Expected parsing error")
+    }
+
 }

@@ -27,10 +27,6 @@ fun Route.appRoutes() {
                     call.respond(HttpStatusCode.BadRequest, mapOf("error" to ex.message))
                 } catch (ex: ParsingException) {
                     call.respond(HttpStatusCode.BadRequest, mapOf("error" to ex.message))
-                } catch (ex: Exception) {
-                    // fallback
-                    call.application.log.error("Unexpected error in /api/benford", ex)
-                    call.respond(HttpStatusCode.InternalServerError, mapOf("error" to "Internal server error"))
                 }
             }
 
